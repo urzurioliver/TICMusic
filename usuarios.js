@@ -14,3 +14,19 @@ const saltRounds = 10;
   
   res.status(201).json(result.rows[0]);
   };
+  const Login = async (req, res) => {
+    const {nombre, password} = req.body;
+    const userdata =
+    await query(
+      "SELECT nombre, password FROM usuarios "
+    )
+    if (nombre == userdata.nombre){
+      bcrypt.compare(password, userdata.hashed)
+    }
+  }
+  const funciones = {
+    CrearUsuario,
+    Login
+  };
+  
+  export default funciones;
