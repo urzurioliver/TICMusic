@@ -1,8 +1,8 @@
 import express from "express";
 const app = express();
 const port = 3000;
-import usuario from "usuarios.js";
+import funciones from "usuarios.js";
 
-app.post("/crearusuario", usuario.CrearUsuario);
-app.post("/login", usuario.Login);
-app.post("/escucho", usuario.Escucho);
+app.post("/crearusuario", funciones.CrearUsuario);
+app.post("/login", funciones.Login);
+app.post("/escucho", funciones.Escucho);
