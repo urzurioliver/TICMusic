@@ -33,10 +33,23 @@ const saltRounds = 10;
     await query(
       "SELECT nombre, password FROM usuarios "
     )
-    if (nombre == userdata.nombre){
-      bcrypt.compare(password, userdata.hashed)
+    if (nombre == userdata[0].nombre){
+      const esCorrecta = await bcrypt.compare(password, userdata[0].password);
+      if(esCorrecta){
+        const token = jwt.sign(
+          { id: userdata[0].id, nombre: userdata[0].nombre },
+          process.env.JWT_SECRET || 'tu_clave_secreta', // Usa siempre variables de entorno
+          { expiresIn: '2h' });
+        return res.status(200).json({message: "Autenticación exitosa",token});}
+      else{
+        return res.status(401).json({ message: "contraseña incorrecta" });
     }
   }
+    else{
+      return res.status(401).json({ message: "Usuario incorrecto" });}
+  }
+  
+
   const funciones = {
     CrearUsuario,
     Login
