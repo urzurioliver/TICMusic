@@ -6,7 +6,7 @@ const CrearUsuario = async (req, res) => {
     const { userid, nombre, password } = req.body;
   const hashed = await bcrypt.hash(password, 10)
   await query(
-    "INSERT INTO usuarios (userid, nombre, password) VALUES ($1, $2, )",
+    "INSERT INTO usuarios (userid, nombre, password) VALUES ($1, $2, $3)",
     [userid, nombre, hashed]
   );
   
@@ -17,30 +17,36 @@ const CrearUsuario = async (req, res) => {
   res.status(201).json(result.rows[0]);
   };
 
-  const verEscuchas = async (req, res, next) => {
+  const Escucho = async (req, res, next) => {
     const {token} = req.body; 
     let payloadOriginal = null
 
     try{
-      payloadOriginal = await jwt.verify(token,   claveSuperSecretaAntiBoludos)
+      payloadOriginal = await jwt.verify(token, claveSuperSecretaAntiBoludos)
     } catch(e) {
       console.error(e)
      }
-    const result = await query ("SELECT 
+    const result = await query ("SELECT * FROM usuarios WHERE id = $1", 
+    [payloadOriginal.id]
+  );
+  return res.status(200).json(result.rows[0]);
   }
   const Login = async (req, res) => {
     const {userid, password} = req.body;
     const userdata =
     await query(
-      "SELECT nombre, password FROM usuarios WHERE id=$1",[userid]
+      "SELECT id, nombre, password FROM usuarios WHERE userid=$1",[userid]
     )
     const usuario = userdata.rows[0]
-    if (nombre == usuario.nombre){
-      const esCorrecta = await bcrypt.compare(password, userdata[0].password);
+     if (userdata.rows.length === 0) {
+    return res.status(401).json({ error: "El usuario no existe" });
+  }
+    else if (nombre == usuario.nombre){
+      const esCorrecta = await bcrypt.compare(password, usuario.password);
       if(esCorrecta){
         const token = jwt.sign(
           { id: usuario.id, nombre: usuario.nombre },
-          process.env.JWT_SECRET, 
+          claveSuperSecretaAntiBoludos,
           { expiresIn: '2h' });
         return res.status(200).json({message: "Autenticación exitosa",token});}
       else{
@@ -55,7 +61,7 @@ const CrearUsuario = async (req, res) => {
   const funciones = {
     CrearUsuario,
     Login,
-    verEscuchas
+    Escucho
   };
   
   export default funciones;
