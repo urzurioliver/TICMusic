@@ -3,9 +3,8 @@ const jwt = require('jsonwebtoken')
 
 const claveSuperSecretaAntiBoludos = 'calveSuperSecretaAntiBoludos'
 const CrearUsuario = async (req, res) => {
-const saltRounds = 10;
     const { userid, nombre, password } = req.body;
-  const hashed = await bcrypt.hash(password, saltRounds)
+  const hashed = await bcrypt.hash(password, 10)
   await query(
     "INSERT INTO usuarios (userid, nombre, password) VALUES ($1, $2, )",
     [userid, nombre, hashed]
@@ -19,6 +18,7 @@ const saltRounds = 10;
   };
 
   const verEscuchas = async (req, res, next) => {
+    const {token} = req.body; 
     let payloadOriginal = null
 
     try{
@@ -26,19 +26,21 @@ const saltRounds = 10;
     } catch(e) {
       console.error(e)
      }
+    const result = await query ("SELECT 
   }
   const Login = async (req, res) => {
-    const {nombre, password} = req.body;
+    const {userid, password} = req.body;
     const userdata =
     await query(
-      "SELECT nombre, password FROM usuarios "
+      "SELECT nombre, password FROM usuarios WHERE id=$1",[userid]
     )
-    if (nombre == userdata[0].nombre){
+    const usuario = userdata.rows[0]
+    if (nombre == usuario.nombre){
       const esCorrecta = await bcrypt.compare(password, userdata[0].password);
       if(esCorrecta){
         const token = jwt.sign(
-          { id: userdata[0].id, nombre: userdata[0].nombre },
-          process.env.JWT_SECRET || 'tu_clave_secreta', // Usa siempre variables de entorno
+          { id: usuario.id, nombre: usuario.nombre },
+          process.env.JWT_SECRET, 
           { expiresIn: '2h' });
         return res.status(200).json({message: "Autenticación exitosa",token});}
       else{
@@ -52,7 +54,8 @@ const saltRounds = 10;
 
   const funciones = {
     CrearUsuario,
-    Login
+    Login,
+    verEscuchas
   };
   
   export default funciones;
