@@ -1,5 +1,5 @@
-import pkg from "pg";
-const { Pool } = pkg;
+import { Pool } from "pg";
+
 
 export const pool = new Pool({
   host: "ep-tiny-forest-axapyckr-pooler.c-4.us-east-2.aws.neon.tech",
