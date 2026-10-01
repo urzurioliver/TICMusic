@@ -11,3 +11,4 @@ app.post("/escucho", funciones.Escucho);
 app.listen(port, () => {
   console.log(`Servidor levantado y escuchando en http://localhost:${port}`);
 }); 
+export default app;
