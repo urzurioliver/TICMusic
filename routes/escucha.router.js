@@ -4,6 +4,6 @@ import middleware from "../middleware.js"
 
 
 const router = Router()
-router.post("/", funciones.Escucho)
+router.post("/:id", funciones.Escucho)
 
 export default router
