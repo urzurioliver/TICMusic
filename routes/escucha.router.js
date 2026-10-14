@@ -1,6 +1,6 @@
 import Router from "express"
 import funciones from "../usuarios.js"
-import middleware from "../middleware.js"
+import middleware from "../middlewares/middleware.js"
 
 
 const router = Router()

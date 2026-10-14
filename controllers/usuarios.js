@@ -1,6 +1,7 @@
-import { query } from "./db.js";
+import { query } from "../services/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import middleware from "../middlewares/middleware.js";
 
 const claveSuperSecretaAntiBoludos = 'calveSuperSecretaAntiBoludos'
 const CrearUsuario = async (req, res) => {
@@ -51,14 +52,26 @@ const CrearUsuario = async (req, res) => {
         return res.status(401).json({ message: "contraseña incorrecta" });
     }
   }
-
   }
-  
+  const createCancion = async (req, res) => {
+    const { nombre } = req.body;
+    verifyAdmin(req, res, async () => { // zuri tengo que seguir trabajando aca, me dio sueno jajant
+
+    if(!nombre){
+      return res.status(400).json({ message: "ingresar nombre" });
+    }
+    await query(
+      "INSERT INTO cancion (nombre) VALUES ($1)",
+      [nombre]
+    );
+    res.status(201).json({ message: "Canción creada exitosamente" });
+  };
 
   const funciones = {
     CrearUsuario,
     Login,
-    Escucho
+    Escucho,
+    createCancion
   };
   
   export default funciones;
