@@ -5,8 +5,8 @@ import middleware from "../middlewares/middleware.js"
 
 const router = Router()
 
-router.post("/", funciones.createCancion)
-router.put("/", funciones.changeSongName)
-router.delete("/", funciones.deleteSong)
+router.post("/crearCancion", middleware.verifyToken, middleware.VerifyAdmin, funciones.createCancion)
+router.put("/cambiarNombre", middleware.verifyToken, middleware.VerifyAdmin, funciones.cambiarNombreCancion)
+router.delete("/borrarCancion", middleware.verifyToken, middleware.VerifyAdmin, funciones.borrarCancion)
 
 export default router

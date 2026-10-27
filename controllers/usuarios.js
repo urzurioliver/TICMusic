@@ -1,7 +1,6 @@
 import { query } from "../services/db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import middleware from "../middlewares/middleware.js";
 
 const claveSuperSecretaAntiBoludos = 'calveSuperSecretaAntiBoludos'
 const CrearUsuario = async (req, res) => {
@@ -55,7 +54,6 @@ const CrearUsuario = async (req, res) => {
   }
   const createCancion = async (req, res) => {
     const { nombre } = req.body;
-    verifyAdmin(req, res, async () => { // zuri tengo que seguir trabajando aca, me dio sueno jajant
 
     if(!nombre){
       return res.status(400).json({ message: "ingresar nombre" });
@@ -65,13 +63,56 @@ const CrearUsuario = async (req, res) => {
       [nombre]
     );
     res.status(201).json({ message: "Canción creada exitosamente" });
-  };
+  }
+
+  async function cambiarNombreCancion (req, res) {
+    const {id, nuevoNombre} = req.body
+
+    if(!nuevoNombre || !id){
+      return res.status(400).json({ message: "ingresar nombre"})
+    }
+
+    await query (
+      'UPDATE "Cancion" SET nombre = $1 WHERE id = $2', [nuevoNombre, id]
+    )
+    return res.status(202).json({ message: "Nombre cambiado exitosamente"})
+  }
+
+  async function borrarCancion (req, res){
+    const {id} = req.body
+    if(!id){
+      return res.status(400).json({message: "poné el ID"})
+    }
+
+    await query ('DELETE * FROM "Escucha" WHERE id = $1', [id] )
+    await query ('DELETE * FROM "Cancion" WHERE id = $1', [id])
+
+    return res.status(204).json({message: "Cancion borrada exitosamente"})
+  }  
+
+  async function escucharCancion (req, res){
+    const {id} = req.body
+    const usuario = req.user_id
+    if(!id){
+      return res.status(400).json({message: "poné el ID"})
+    }
+
+    await query ('UPDATE  "Escucha" SET reproducciones = reproducciones + 1 WHERE id = $1', [id])
+    const escuchas = await query('SELECT reproducciones FROM "Escucha" WHERE usuario_id = $1', [usuario])
+    if(escuchas >10){
+      await query('UPDATE "Usuario" SET fan = true WHERE id = $1', [usuario])
+    }
+  }
 
   const funciones = {
     CrearUsuario,
     Login,
     Escucho,
-    createCancion
+    createCancion,
+    cambiarNombreCancion,
+    borrarCancion,
+    escucharCancion
+
   };
   
-  export default funciones;
+  export default funciones
