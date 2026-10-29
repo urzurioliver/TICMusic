@@ -1,11 +1,13 @@
 import jwt from "jsonwebtoken"
 
+let claveSuperSecretaAntiBoludos = "calveSuperSecretaAntiBoludos"
 async function verifyToken(req, res, next){
     const { token } = req.body
     let payloadOriginal = null
     try{
         payloadOriginal = await jwt.verify(token, claveSuperSecretaAntiBoludos)
         req.user_id = payloadOriginal.id
+        console.log("verificado")
         next()
     } catch(e){
         console.error(e)
