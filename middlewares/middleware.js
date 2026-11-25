@@ -3,10 +3,9 @@ import jwt from "jsonwebtoken"
 let claveSuperSecretaAntiBoludos = "calveSuperSecretaAntiBoludos"
 async function verifyToken(req, res, next){
     const { token } = req.body
-    let payloadOriginal = null
+    if (!token) return res.status(401).json({ error: "Falta el token" });
     try{
-        payloadOriginal = await jwt.verify(token, claveSuperSecretaAntiBoludos)
-        req.user_id = payloadOriginal.id
+        req.user = await jwt.verify(token, claveSuperSecretaAntiBoludos)
         console.log("verificado")
         next()
     } catch(e){
@@ -14,12 +13,11 @@ async function verifyToken(req, res, next){
     }
 }
 async function VerifyAdmin(req, res, next){
-    const role = await query ("SELECT rol FROM usuarios WHERE id = $1", [req.user_id]);
-    if (role == "A"){
-        next()
+    if (req.user.rol === "A"){
+    next()
     }
     else {
-        return res.status(401).send({error: "Unauthorized"});
+        return res.status(403).send({error: "Unauthorized"});
     }
 }
 const middleware = {

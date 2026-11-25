@@ -24,7 +24,7 @@ const CrearUsuario = async (req, res) => {
     } catch(e) {
       console.error(e)
      }
-    const result = await query ("SELECT * FROM usuario INNER JOIN escucha on usuario.id = escucha.usuario_id inner join cancion on escucha.cancion_id = cancion.id WHERE usuario.id = $1 ", 
+    const result = await query ("SELECT * FROM Usuario INNER JOIN Escucha on Usuario.id = Escucha.Usuario_id inner join Cancion on Escucha.cancion_id = Cancion.id WHERE Usuario.id = $1 ", 
     [payloadOriginal.id]
   );
   return res.status(200).json(result.rows);
