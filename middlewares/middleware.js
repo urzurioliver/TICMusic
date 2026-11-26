@@ -2,7 +2,9 @@ import jwt from "jsonwebtoken"
 
 let claveSuperSecretaAntiBoludos = "calveSuperSecretaAntiBoludos"
 async function verifyToken(req, res, next){
-    const token = req.headers.authorization?.split(" ")[1]
+    console.log("Authorization:", req.headers.authorization);
+    const token = req.headers.authorization?.split(" ")[1];
+    console.log("Token obtenido:", token);
     if (!token) return res.status(401).json({ error: "Falta el token" });
     try{
         req.user = await jwt.verify(token, claveSuperSecretaAntiBoludos)
