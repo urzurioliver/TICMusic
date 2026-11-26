@@ -96,6 +96,7 @@ const CrearUsuario = async (req, res) => {
   async function escucharCancion (req, res){
     const {id} = req.body
     const usuario = req.user.id
+    console.log(usuario)
     if(!id){
       return res.status(400).json({message: "poné el ID"})
     }
