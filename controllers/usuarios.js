@@ -1,4 +1,4 @@
-import { query } from "../services/db.js";
+import { query } from "../db.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -99,25 +99,28 @@ const CrearUsuario = async (req, res) => {
     if(!id){
       return res.status(400).json({message: "poné el ID"})
     }
-    await query ('INSERT INTO "Escucha" (usuario_id, cancion_id) SELECT $1, $2 WHERE NOT EXISTS (SELECT 1 FROM "Escucha" WHERE usuario_id = $1 AND cancion_id = $2)', [usuario, id]) 
-    const escuchas = await query('SELECT reproducciones FROM "Escucha" WHERE usuario_id = $1', [usuario])
-    console.log(escuchas.rows[0].reproducciones)
-    if(escuchas.rows[0].reproducciones == null){
-      await query('UPDATE "Escucha" SET reproducciones = 1 WHERE usuario_id = $1 AND cancion_id = $2', [usuario, id])
-      console.log("null")
-      return res.status(200).json({message: "Escucha registrada exitosamente"})
-    } else if(escuchas.rows[0].reproducciones <=10){
-      await query('UPDATE "Escucha" SET reproducciones = reproducciones + 1 WHERE usuario_id = $1 AND cancion_id = $2', [usuario, id])
-      console.log("menos de 10")
-      return res.status(200).json({message: "Escucha registrada exitosamente"})
-    } else if(escuchas.rows[0].reproducciones >10){
-      await query('UPDATE "Usuario" SET fan = true WHERE id = $1', [usuario])
-      await query('UPDATE "Escucha" SET reproducciones = reproducciones + 1 WHERE usuario_id = $1 AND cancion_id = $2', [usuario, id])
-      return res.status(200).json({message: "Escucha registrada exitosamente"})
-    
+    if(!usuario){
+      return res.status(400).json({message: "poné el usuario"})
     }
 
-  }
+    await query('UPDATE "Escucha" SET reproducciones = reproducciones + 1 WHERE usuario_id = $1 AND cancion_id = $2', [usuario, id])
+    
+    const escuchas = await query('SELECT reproducciones FROM "Escucha" WHERE usuario_id = $1 AND cancion_id = $2', [usuario, id])
+
+    if(escuchas.rows[0] == undefined){
+          await query ('INSERT INTO "Escucha" (usuario_id, cancion_id, reproducciones) SELECT $1, $2, 1 WHERE NOT EXISTS (SELECT 1 FROM "Escucha" WHERE usuario_id = $1 AND cancion_id = $2)', [usuario, id]) 
+          return res.status(200).json({message: "Escucha registrada exitosamente"})
+    }
+      
+    if(escuchas.rows[0].reproducciones == 11){
+
+      await query('UPDATE "Usuario" SET fan = true WHERE id = $1', [usuario])
+      
+      return res.status(200).json({message: "Escucha registrada exitosamente"})
+      }
+
+    return res.status(200).json({message: "Escucha registrada exitosamente"})
+    }
 
   const funciones = {
     CrearUsuario,
