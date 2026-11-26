@@ -102,6 +102,7 @@ const CrearUsuario = async (req, res) => {
     if(!usuario){
       return res.status(400).json({message: "poné el usuario"})
     }
+    //hola
 
     await query('UPDATE "Escucha" SET reproducciones = reproducciones + 1 WHERE usuario_id = $1 AND cancion_id = $2', [usuario, id])
     
